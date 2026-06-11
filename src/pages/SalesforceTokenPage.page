@@ -1,0 +1,289 @@
+<apex:page id="thePage"
+           controller="GitHubTokenUtils"
+           lightningStylesheets="true"
+           showHeader="false"
+           sidebar="false"
+           docType="html-5.0">
+
+<html>
+<head>
+
+<style>
+
+:root{
+    --bg:#f6f4f0;
+    --card:#ffffff;
+    --text:#212121;
+    --border:#e5e7eb;
+    --success:#22c55e;
+    --danger:#ef4444;
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    font-family:'Segoe UI',sans-serif;
+    color:var(--text);
+}
+
+.auth-wrapper{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.auth-card{
+    width:500px;
+    max-width:100%;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:40px;
+    text-align:center;
+    box-shadow:var(--shadow);
+}
+
+.logo{
+    font-size:60px;
+    margin-bottom:10px;
+}
+
+.title{
+    font-size:28px;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#666;
+    line-height:1.6;
+    margin-bottom:30px;
+}
+
+.primary-btn{
+    background:#212121 !important;
+    color:white !important;
+    border:none !important;
+    padding:14px 28px !important;
+    border-radius:10px !important;
+    cursor:pointer !important;
+    font-size:15px !important;
+    transition:.3s;
+}
+
+.primary-btn:hover{
+    transform:translateY(-2px);
+}
+
+.oauth-steps{
+    margin-top:30px;
+    text-align:left;
+    border-top:1px solid #eee;
+    padding-top:20px;
+}
+
+.oauth-step{
+    padding:10px 0;
+    color:#555;
+}
+
+.success-box{
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    color:#166534;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.error-box{
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.checkmark{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:var(--success);
+    color:white;
+    font-size:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 20px;
+    animation:pop .5s ease;
+}
+
+@keyframes pop{
+    from{
+        transform:scale(.5);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.waitingSearchDiv{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:9999;
+    background:rgba(255,255,255,.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.loader{
+    width:70px;
+    height:70px;
+    border:6px solid #e5e7eb;
+    border-top:6px solid #212121;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.loading-text{
+    margin-top:15px;
+    font-size:16px;
+    color:#444;
+    text-align:center;
+}
+
+</style>
+
+<script>
+
+window.onload = function(){
+
+    let code = '{!JSENCODE($CurrentPage.parameters.code)}';
+
+    if(code){
+        document.getElementById('successPanel').style.display='block';
+        fetchAccessToken();
+    }
+}
+
+</script>
+
+</head>
+
+<body>
+
+<apex:form id="theForm">
+
+<apex:actionStatus id="theStatus">
+    <apex:facet name="start">
+
+        <div class="waitingSearchDiv">
+
+            <div>
+                <div class="loader"></div>
+
+                <div class="loading-text">
+                    Connecting with GitHub...
+                    <br/>
+                    Please wait.
+                </div>
+            </div>
+
+        </div>
+
+    </apex:facet>
+</apex:actionStatus>
+
+<apex:actionFunction
+    name="fetchAccessToken"
+    action="{!getAccessToken}"
+    status="theStatus"
+    reRender="theForm"/>
+
+<div class="auth-wrapper">
+
+    <div class="auth-card">
+
+        <div class="logo">
+            🐙
+        </div>
+
+        <div class="title">
+            GitHub OAuth Integration
+        </div>
+
+        <div class="subtitle">
+            Connect your GitHub account with Salesforce
+            using OAuth 2.0 Web Server Flow.
+        </div>
+
+        <div id="successPanel" style="display:none;">
+
+            <div class="checkmark">
+                ✓
+            </div>
+
+            <div class="success-box">
+                Authorization code received successfully.
+                Exchanging code for access token...
+            </div>
+
+        </div>
+
+        <apex:pageMessages />
+
+        <apex:commandButton
+            value="Authorize GitHub Account"
+            action="{!getAuthCode}"
+            status="theStatus"
+            styleClass="primary-btn"/>
+
+        <div class="oauth-steps">
+
+            <div class="oauth-step">
+                Authorize Application
+            </div>
+
+            <div class="oauth-step">
+                Receive Authorization Code
+            </div>
+
+            <div class="oauth-step">
+                Exchange Code For Token
+            </div>
+
+            <div class="oauth-step">
+                <ul>
+                    <li>Connected</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</apex:form>
+
+</body>
+</html>
+
+</apex:page>
